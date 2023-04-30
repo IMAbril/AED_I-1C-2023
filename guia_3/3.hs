@@ -9,7 +9,3 @@ estanRelacionados :: Integer -> Integer -> Bool
 estanRelacionados a b | (mod a b == 0 )= True
                       | otherwise = False
 
---d)sumaTerna: dada una terna de enteros, calcula la suma de sus tres elementos
-
-sumaTerna :: (Integer, Integer, Integer) -> Integer
-sumaTerna (x,y,z) = x + y + z 
