@@ -1,7 +1,7 @@
 -- Completar con los datos del grupo
 --
--- Nombre de Grupo: xx
--- Integrante 1: Nombre Apellido, email, LU
+-- Nombre de Grupo: Lambdadería
+-- Integrante 1: Abril Magali Ibarra, abrilibarra3095@gmail.com, 945/23
 -- Integrante 2: Nombre Apellido, email, LU
 -- Integrante 3: Nombre Apellido, email, LU
 -- Integrante 4: Nombre Apellido, email, LU
@@ -75,7 +75,7 @@ tieneUnSeguidorFiel = undefined
 existeSecuenciaDeAmigos :: RedSocial -> Usuario -> Usuario -> Bool
 existeSecuenciaDeAmigos = undefined
 
---Predicados
+--Predicados Auxiliares
 pertenece :: (Eq t) => t -> [t] -> Bool
 pertenece e [] = False
 pertenece e (x:xs) = e == x || pertenece e xs 
@@ -85,6 +85,26 @@ mismosElementos [] [] = True
 mismosElementos [] l2 = False
 mismosElementos l1 l2 = (pertenece (head l1) l2) && (mismosElementos (tail l1) (tail l2) )
 
+empiezaCon :: (Eq t) => t -> [t] -> Bool
+empiezaCon e [] = False
+empiezaCon e l = head l == e
+
+terminaCon :: (Eq t) => t -> [t] -> Bool
+terminaCon e [] = False
+terminaCon e [x] = e == x
+terminaCon e (x:xs) = terminaCon e xs
+
 sinRepetidos :: (Eq t) => [t] -> Bool
-sinRepetidos a | a == [] = True
-               | otherwise = not (pertenece (head a) (tail a)) && (sinRepetidos (tail (tail a)))
+sinRepetidos [] = True
+sinRepetidos (x:xs) = not(pertenece x xs) && sinRepetidos xs
+
+sonDeLaRed :: RedSocial -> [Usuario] -> Bool
+sonDeLaRed red [] = True
+sonDeLaRed red us = (pertenece (head us) (usuarios red) ) && sonDeLaRed red (tail us)
+
+relacionadosDirecto :: Usuario -> Usuario -> RedSocial -> Bool
+relacionadosDirecto u1 u2 red = pertenece (u1, u2) (relaciones red) || pertenece (u2, u1) (relaciones red)
+
+cadenaDeAmigos :: [Usuario] -> RedSocial -> Bool
+cadenaDeAmigos [] red = True
+cadenaDeAmigos (u:us) red = relacionadosDirecto u (head us) red && cadenaDeAmigos us red
