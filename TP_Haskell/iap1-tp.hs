@@ -106,5 +106,60 @@ relacionadosDirecto :: Usuario -> Usuario -> RedSocial -> Bool
 relacionadosDirecto u1 u2 red = pertenece (u1, u2) (relaciones red) || pertenece (u2, u1) (relaciones red)
 
 cadenaDeAmigos :: [Usuario] -> RedSocial -> Bool
-cadenaDeAmigos [] red = True
+cadenaDeAmigos [user1,user0] red = (relacionadosDirecto user1 user0 red)
 cadenaDeAmigos (u:us) red = relacionadosDirecto u (head us) red && cadenaDeAmigos us red
+
+-- REVISAR
+noHayPublicacionesRepetidas :: [Publicacion] -> Bool
+noHayPublicacionesRepetidas pubs = sinRepetidos pubs
+{-Hay que revisar si noHayPublicacionesRepetidas realmente cumple la especificación-}
+
+usuariosLikeValidos :: [Usuario] -> [Usuario] -> Bool
+usuariosLikeValidos [] us = True
+usuariosLikeValidos (user:usl) us = (pertenece user us) && (usuariosLikeValidos usl us)  
+
+usuariosDelLikeDePublicacionSonUsuariosDeRed :: [Usuario] -> [Publicacion] -> Bool
+usuariosDelLikeDePublicacionSonUsuariosDeRed us [] = True
+usuariosDelLikeDePublicacionSonUsuariosDeRed us pubs = (pertenece (usuarioDePublicacion (head pubs)) us ) && (usuariosDelLikeDePublicacionSonUsuariosDeRed us (tail pubs))
+
+publicacionesValidas :: [Usuario] -> [Publicacion] -> Bool
+publicacionesValidas us pubs = (noHayPublicacionesRepetidas pubs) && (usuariosDelLikeDePublicacionSonUsuariosDeRed us pubs)
+
+--Revisar
+noHayRelacionesRepetidas :: [Relacion] -> Bool
+noHayRelacionesRepetidas rels = sinRepetidos rels
+{-Hay que revisar si noHayRelacionesRepetidas realmente cumple la especificación-}
+
+relacionesAsimetricas :: [Relacion] -> Bool
+relacionesAsimetricas [] = True
+relacionesAsimetricas (rel:rels) =  not (pertenece (snd rel, fst rel) (rel:rels)) && relacionesAsimetricas rels   
+
+usuariosDeRelacionValidos :: [Usuario] -> [Relacion] -> Bool
+usuariosDeRelacionValidos us [] = True
+usuariosDeRelacionValidos us (rel:rels) = (pertenece (fst rel) us) && (pertenece (snd rel) us) && (usuariosDeRelacionValidos us rels)
+
+relacionesValidas :: [Usuario] -> [Relacion] -> Bool 
+relacionesValidas us rels = (usuariosDeRelacionValidos us rels) && (relacionesAsimetricas rels) && (noHayRelacionesRepetidas rels)
+
+--Revisar 
+noHayIdsRepetidos :: [Usuario] -> Bool
+noHayIdsRepetidos us = sinRepetidos us  
+{-Revisar si noHayIdsRepetidos cumple la especificación-}
+
+--Alternativa noHayIdsRepetidos (rebuscada pero cumple la especificación) 
+a_noHayIdsRepetidos :: [Usuario] -> Bool
+a_noHayIdsRepetidos [] = True
+a_noHayIdsRepetidos (u:us) = not (pertenece u us) && a_noHayIdsRepetidos us
+    where id = idDeUsuario u  
+
+--Consultar si hay que tener en cuenta los nombres vacios ej "  " como longitud de longitud >0 (en caso de que no, este código cumple)
+usuarioValido :: Usuario -> Bool
+usuarioValido u = (idDeUsuario u > 0)&& ((nombreDeUsuario u) /= "")
+
+usuariosValidos :: [Usuario] -> Bool
+usuariosValidos [] = True
+usuariosValidos (u:us) = (usuarioValido u) && (noHayIdsRepetidos (u:us)) && (usuariosValidos us)
+
+redSocialValida :: RedSocial -> Bool
+redSocialValida red = (usuariosValidos (usuarios red)) && (relacionesValidas (usuarios red) (relaciones red)) && (publicacionesValidas (usuarios red) (publicaciones red))
+
