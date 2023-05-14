@@ -37,39 +37,92 @@ likesDePublicacion (_, _, us) = us
 -- Ejercicios
 
 nombresDeUsuarios :: RedSocial -> [String]
-nombresDeUsuarios = undefined
+nombresDeUsuarios red | redSocialValida red = proyectarNombres (usuarios red)
+                      | otherwise = []
 
--- describir qué hace la función: .....
+--Funciones auxiliares para nombresDeUsuarios
+
+proyectarNombres :: [Usuario] -> [String]
+proyectarNombres (u:us) | (u:us) == [u] = (snd u : [])  
+                        | sinRepetidos (u:us) = (snd u : (proyectarNombres us))
+                        | otherwise = proyectarNombres (eliminarRepetidos (u:us))
+
+eliminarRepetidos :: (Eq t) => [t] -> [t]
+eliminarRepetidos (e:list) | sinRepetidos (e:list) = e:list
+                           | pertenece e list = eliminarRepetidos list
+                           | otherwise = e : (eliminarRepetidos list)
+--Fin funciones auxiliares para nombresDeUSuarios
+
+-- nombresDeUsuarios: Dada una red social valida, devuelve una lista de los nombres de los usuarios de la red.
+
 amigosDe :: RedSocial -> Usuario -> [Usuario]
-amigosDe = undefined
+amigosDe red u | usuarios red == [] = []
+               | (u /= u2) && (relacionadosDirecto u u2 red ) = u2 : (amigosDe sinU2 u) 
+               | otherwise = amigosDe sinU2 u
+               where u2 = head (usuarios red)
+                     sinU2 = (tail (usuarios red), relaciones red, publicaciones red ) 
 
 -- describir qué hace la función: .....
 cantidadDeAmigos :: RedSocial -> Usuario -> Int
-cantidadDeAmigos = undefined
+cantidadDeAmigos red u = longitud (amigosDe red u)
+
+--Funcion auxiliar para cantidadDeAmigos
+longitud :: (Eq t) => [t]->Int
+longitud [] = 0
+longitud (x:xs) = 1 + longitud xs
+--Fin funcion auxiliar para cantidadDeAmigos
 
 -- describir qué hace la función: .....
 usuarioConMasAmigos :: RedSocial -> Usuario
-usuarioConMasAmigos = undefined
+usuarioConMasAmigos red = compararAmigos red (usuarios red)
+--Funcion auxiliar para usuarioConMasAmigos
+compararAmigos :: RedSocial -> [Usuario] -> Usuario
+compararAmigos red [] = undefined
+compararAmigos red (u:us) | (u:us) == [u] = u
+                          | cantidadDeAmigos red u <= cantidadDeAmigos red (head us) = compararAmigos red us
+                          | otherwise = compararAmigos red (u: (tail us)) 
 
 -- describir qué hace la función: .....
 estaRobertoCarlos :: RedSocial -> Bool
-estaRobertoCarlos = undefined
-
+estaRobertoCarlos red = (cantidadDeAmigos red (usuarioConMasAmigos red) > 10)
 -- describir qué hace la función: .....
 publicacionesDe :: RedSocial -> Usuario -> [Publicacion]
-publicacionesDe = undefined
+publicacionesDe red u = publicacionesDeAux (publicaciones red) u
+
+--Auxiliar de publicacionesDe
+publicacionesDeAux :: [Publicacion] -> Usuario -> [Publicacion]
+publicacionesDeAux [] u = []
+publicacionesDeAux (p:pubs) u | (usuarioDePublicacion p == u) = p: (publicacionesDeAux pubs u)
+                  | otherwise = publicacionesDeAux pubs u
+--Fin Auxiliar
 
 -- describir qué hace la función: .....
 publicacionesQueLeGustanA :: RedSocial -> Usuario -> [Publicacion]
-publicacionesQueLeGustanA = undefined
+publicacionesQueLeGustanA red u = pubsQueLeGustanAAUX (publicaciones red) u
+
+pubsQueLeGustanAAUX :: [Publicacion] -> Usuario -> [Publicacion]
+pubsQueLeGustanAAUX [] u = []
+pubsQueLeGustanAAUX (p:pubs) u | pertenece u (likesDePublicacion p) = p : (pubsQueLeGustanAAUX pubs u)
+                               | otherwise = pubsQueLeGustanAAUX pubs u 
 
 -- describir qué hace la función: .....
 lesGustanLasMismasPublicaciones :: RedSocial -> Usuario -> Usuario -> Bool
-lesGustanLasMismasPublicaciones = undefined
+lesGustanLasMismasPublicaciones red u1 u2 = mismosElementos (publicacionesQueLeGustanA red u1) (publicacionesQueLeGustanA red u2)
 
 -- describir qué hace la función: .....
 tieneUnSeguidorFiel :: RedSocial -> Usuario -> Bool
-tieneUnSeguidorFiel = undefined
+tieneUnSeguidorFiel red u = existeSeguidorFiel red (usuarios red) u
+
+existeSeguidorFiel :: RedSocial -> [Usuario] -> Usuario -> Bool
+existeSeguidorFiel red us autor | us == [] = False
+                                | leGustanTodasLasPublisDe (publicacionesDe red autor) (head us) = True
+                                | otherwise = existeSeguidorFiel red (tail us) autor  
+
+leGustanTodasLasPublisDe :: [Publicacion] -> Usuario -> Bool
+leGustanTodasLasPublisDe pubs u | pubs == [] = True
+                                | likesDePublicacion (head pubs) == [] = False
+                                | pertenece u (likesDePublicacion (head pubs)) = True && (leGustanTodasLasPublisDe (tail pubs) u) 
+                                | otherwise = False  
 
 -- describir qué hace la función: .....
 existeSecuenciaDeAmigos :: RedSocial -> Usuario -> Usuario -> Bool
