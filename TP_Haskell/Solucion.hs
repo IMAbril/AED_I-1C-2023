@@ -1,8 +1,9 @@
+module Solucion where 
 -- Completar con los datos del grupo
 --
 -- Nombre de Grupo: Lambdadería
 -- Integrante 1: Abril Magali Ibarra, abrilibarra3095@gmail.com, 945/23
--- Integrante 2: Nombre Apellido, email, LU
+-- Integrante 2: NOmbre Apellido, email, LU
 -- Integrante 3: Nombre Apellido, email, LU
 -- Integrante 4: Nombre Apellido, email, LU
 
@@ -126,7 +127,24 @@ leGustanTodasLasPublisDe pubs u | pubs == [] = True
 
 -- describir qué hace la función: .....
 existeSecuenciaDeAmigos :: RedSocial -> Usuario -> Usuario -> Bool
-existeSecuenciaDeAmigos = undefined
+existeSecuenciaDeAmigos red u1 u2 = sonDeLaRed red us && cadenaDeAmigos us red
+    where us = hastaUsuario red (desdeUsuario red (usuarios red) u1) u2
+
+hastaUsuario :: RedSocial -> [Usuario] -> Usuario -> [Usuario]
+hastaUsuario red us u2 | (terminaCon u2 us) = us
+                       | otherwise = hastaUsuario red (eliminarUltimo us) u2
+
+eliminarUltimo :: (Eq t) => [t] -> [t]
+eliminarUltimo [] = []
+eliminarUltimo [_] = []
+eliminarUltimo (x:xs) = x : eliminarUltimo xs
+
+
+desdeUsuario :: RedSocial -> [Usuario] -> Usuario -> [Usuario]
+desdeUsuario red us u1 | us == [] = []
+                       | (empiezaCon u1 us) = us
+                       | otherwise = desdeUsuario red (tail us) u1
+
 
 --Predicados Auxiliares
 pertenece :: (Eq t) => t -> [t] -> Bool
@@ -160,7 +178,7 @@ relacionadosDirecto u1 u2 red = pertenece (u1, u2) (relaciones red) || pertenece
 
 cadenaDeAmigos :: [Usuario] -> RedSocial -> Bool
 cadenaDeAmigos [user1,user0] red = (relacionadosDirecto user1 user0 red)
-cadenaDeAmigos (u:us) red = relacionadosDirecto u (head us) red && cadenaDeAmigos us red
+cadenaDeAmigos us red = relacionadosDirecto (head us) (head (tail us)) red && cadenaDeAmigos (tail us) red
 
 -- REVISAR
 noHayPublicacionesRepetidas :: [Publicacion] -> Bool

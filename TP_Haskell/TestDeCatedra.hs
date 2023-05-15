@@ -1,7 +1,9 @@
+module TestDeCatedra where 
+
 import Test.HUnit
 import Solucion
 
-main = runTestTT tests
+run = runTestTT tests
 
 tests = test [
     " nombresDeUsuarios 1" ~: (nombresDeUsuarios redA) ~?= ["Juan","Natalia","Pedro","Mariela"],

@@ -79,6 +79,6 @@ tieneUnSeguidorFiel toma una red social valida y un usuario valido de esa red. D
 
 --Ejercicio 10--
 {-
-existeSecuenciaDeAmigos toma una red social valida y 2 usuarios validos de la red. Devuelve un valoor booleano el cual es true si se cumplen las siguientes condiciones:
-*Existe una lista de usuarios en la red, de longitud mayor a 2 donde hay CadenaDeAmigos, que empieza con el usuario valido 1 y termina con el usuario valido 2. 
+existeSecuenciaDeAmigos toma una red social valida y 2 usuarios validos de la red. Devuelve un valor booleano el cual es true si se cumplen las siguientes condiciones:
+*Existe una lista de usuarios en la red, de longitud mayor o igual a 2 donde hay CadenaDeAmigos, que empieza con el usuario valido 1 y termina con el usuario valido 2. 
 -}
