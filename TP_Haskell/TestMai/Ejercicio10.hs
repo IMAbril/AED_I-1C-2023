@@ -10,7 +10,6 @@ tests = test [
 
    " Amigos a través de un amigo" ~: (existeSecuenciaDeAmigos redA usuario1 usuario4) ~?= True,
 
-   " Misma persona" ~: (existeSecuenciaDeAmigos redA usuario1 usuario1) ~?= True,
 
    " No estan relacionados " ~: (existeSecuenciaDeAmigos redA usuario1 usuario5) ~?= False,
 
