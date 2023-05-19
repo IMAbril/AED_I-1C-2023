@@ -100,7 +100,8 @@ lesGustanLasMismasPublicaciones red u1 u2 = mismosElementos (publicacionesQueLeG
 
 
 -- verifica si un usuario tiene al menos un seguidor fiel comparando las publicaciones del usuario con las publicaciones que le gustan al primer usuario en la red social
--- Si no se encuentra un seguidor fiel en esa comparación, se realiza la misma verificación en la siguiente red social, eliminando al primer usuario. Esto hasta encontrarlo o finalice la lista
+-- Si no se encuentra un seguidor fiel en esa comparación, se realiza la misma verificación en la siguiente red social, eliminando al primer usuario
+-- Esto hasta encontrarlo o hasta que finalice la lista
 tieneUnSeguidorFiel :: RedSocial -> Usuario -> Bool
 tieneUnSeguidorFiel ([], _, _) _ = False
 tieneUnSeguidorFiel red u | contiene (publicacionesDe red u) (publicacionesQueLeGustanA red usuarioActual) = True
