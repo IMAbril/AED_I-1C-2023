@@ -13,7 +13,7 @@ type Relacion = (Usuario, Usuario) -- usuarios que se relacionan
 type Publicacion = (Usuario, String, [Usuario]) -- (usuario que publica, texto publicacion, likes)
 type RedSocial = ([Usuario], [Relacion], [Publicacion])
 
--- Funciones basicas
+-- FUNCIONES BÁSICAS --
 
 usuarios :: RedSocial -> [Usuario]
 usuarios (us, _, _) = us
@@ -36,12 +36,15 @@ usuarioDePublicacion (u, _, _) = u
 likesDePublicacion :: Publicacion -> [Usuario]
 likesDePublicacion (_, _, us) = us
 
--- Ejercicios
+-- EJERCICIOS --
 
+--toma la lista de usuarios de la red social y la pasa como argumento a la función proyectarNombres para obtener la lista de nombres de usuarios. 
 nombresDeUsuarios :: RedSocial -> [String]
 nombresDeUsuarios (us, _, _) = proyectarNombres us 
 
--- describir qué hace la función: .....
+
+--busca recursivamente las relaciones de la red social 
+--y agrega a la lista de amigos aquellos usuarios que estén relacionados directamente con el usuario dado
 amigosDe :: RedSocial -> Usuario -> [Usuario]
 amigosDe (_, [], _) _ = []
 amigosDe (us, (u1, u2):rs, ps) u
@@ -50,11 +53,15 @@ amigosDe (us, (u1, u2):rs, ps) u
     | otherwise = siguienteAmigo
           where siguienteAmigo =   amigosDe (us, rs, ps) u   
 
--- describir qué hace la función: .....
-cantidadDeAmigos :: RedSocial -> Usuario -> Int
-cantidadDeAmigos red u = longitud (amigosDe red us)
 
--- describir qué hace la función: .....
+--utiliza la función 'amigosDe' para obtener la lista de amigos del usuario en la red social 
+--luego utiliza la función 'longitud' para contar la cantidad de elementos en esa lista, que representa la cantidad de amigos del usuario en la red social.
+cantidadDeAmigos :: RedSocial -> Usuario -> Int
+cantidadDeAmigos red u = longitud (amigosDe red u)
+
+
+--Hace recursión sobre la lista de usuarios, comparando la cantidad de amigos de cada usuario con la cantidad de amigos del usuario acumulado hasta el momento
+--Finaliza una vez que  resultado acumulado sea el usuario con mayor cantidad de amigos 
 usuarioConMasAmigos :: RedSocial -> Usuario
 usuarioConMasAmigos (us, rs, ps) = usuarioConMasAmigos' (tail us) (head us)
   where
@@ -63,41 +70,51 @@ usuarioConMasAmigos (us, rs, ps) = usuarioConMasAmigos' (tail us) (head us)
       | cantidadDeAmigos (us, rs, ps) u > cantidadDeAmigos (us, rs, ps) res = usuarioConMasAmigos' us u
       | otherwise = usuarioConMasAmigos' us res
 
--- describir qué hace la función: .....
+
+--determina si el usuario con más amigos en la red social tiene más de 10 amigos, devolviendo True de ser el caso, caso contrario,False
 estaRobertoCarlos :: RedSocial -> Bool
 estaRobertoCarlos red = (cantidadDeAmigos red (usuarioConMasAmigos red) > 10)
 
--- describir qué hace la función: .....
+
+--filtra las publicaciones de una red social y devuelve únicamente aquellas publicaciones que fueron realizadas por un usuario específico
 publicacionesDe :: RedSocial -> Usuario -> [Publicacion]
 publicacionesDe (_, _, []) _ = []
 publicacionesDe (us, rs, p:ps) u | u == (usuarioDePublicacion p) = p : siguientesPublicaciones
                                  | otherwise = siguientesPublicaciones
-                                 where siguientesPublicaciones = publicacionesDe (us, rs, ps) us
+                                 where siguientesPublicaciones = publicacionesDe (us, rs, ps) u
 
--- describir qué hace la función: .....
+
+--filtra las publicaciones de una red social y devuelve únicamente aquellas publicaciones en las que el usuario especificado se encuentra en la lista de likes(publicaciones que le gustan)
 publicacionesQueLeGustanA :: RedSocial -> Usuario -> [Publicacion]
 publicacionesQueLeGustanA (_, _, []) _ = []
 publicacionesQueLeGustanA (us, rs, (autor, texto, likes):ps) u | pertenece u likes = (autor, texto, likes) : siguientesPubs 
                                                                | otherwise = siguientesPubs
                                                                where siguientesPubs =publicacionesQueLeGustanA (us, rs, ps) u
--- describir qué hace la función: .....
+
+
+--Compara las listas de publicaciones que le gustan a dos usuarios en una red social y determina si son exactamente iguales
+--lo que implica que a ambos usuarios les gustan las mismas publicaciones.
 lesGustanLasMismasPublicaciones :: RedSocial -> Usuario -> Usuario -> Bool
 lesGustanLasMismasPublicaciones red u1 u2 = mismosElementos (publicacionesQueLeGustanA red u1) (publicacionesQueLeGustanA red u2)
 
--- describir qué hace la función: .....
+
+-- verifica si un usuario tiene al menos un seguidor fiel comparando las publicaciones del usuario con las publicaciones que le gustan al primer usuario en la red social
+-- Si no se encuentra un seguidor fiel en esa comparación, se realiza la misma verificación en la siguiente red social, eliminando al primer usuario. Esto hasta encontrarlo o finalice la lista
 tieneUnSeguidorFiel :: RedSocial -> Usuario -> Bool
 tieneUnSeguidorFiel ([], _, _) _ = False
 tieneUnSeguidorFiel red u | contiene (publicacionesDe red u) (publicacionesQueLeGustanA red usuarioActual) = True
-                          | otherwise = tieneUnSeguidorFiel siguienteRed user
+                          | otherwise = tieneUnSeguidorFiel siguienteRed u
                            where
                             usuarioActual = head (usuarios red)
                             siguienteRed = (tail (usuarios red), relaciones red, publicaciones red)
 
--- describir qué hace la función: .....
+--verifica si existe una secuencia de amigos que conecta al usuario de inicio con el usuario objetivo en una red social dada
+--la Aux realiza una búsqueda recursiva de la secuencia de amigos, comprobando si el usuario objetivo pertenece a los amigos actuales
+--Si no se encuentra una secuencia válida, se continúa la búsqueda con los siguientes amigos.
 existeSecuenciaDeAmigos :: RedSocial -> Usuario -> Usuario -> Bool
 existeSecuenciaDeAmigos red uInicio uObjetivo = existeSecuenciaDeAmigosAux red [uInicio] uObjetivo []
 
---Auxiliares
+-- AUXILIARES --
 
 --1
 proyectarNombres :: [Usuario] -> [String]
