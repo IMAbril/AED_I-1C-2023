@@ -1,11 +1,12 @@
-module Solucion where 
+module Solucion where
+
 -- Completar con los datos del grupo
---
+
 -- Nombre de Grupo: Lambdadería
--- Integrante 1: Abril Magali Ibarra, abrilibarra3095@gmail.com, 945/23
--- Integrante 2: NOmbre Apellido, email, LU
--- Integrante 3: Nombre Apellido, email, LU
--- Integrante 4: Nombre Apellido, email, LU
+-- Integrante 1: Tomás Canosa Moreno, tomimoreno03@gmail.com, 310/22
+-- Integrante 2: Maira Daniela Godoy, godoymaira0@gmail.com, 256/23
+-- Integrante 3: Abril Milagros Palacín, abrilmpalacin@gmail.com, 905/19
+-- Integrante 4: Abril Magali Ibarra, abrilibarra3095@gmail.com, 945/23
 
 type Usuario = (Integer, String) -- (id, nombre)
 type Relacion = (Usuario, Usuario) -- usuarios que se relacionan
@@ -38,199 +39,120 @@ likesDePublicacion (_, _, us) = us
 -- Ejercicios
 
 nombresDeUsuarios :: RedSocial -> [String]
-nombresDeUsuarios red | redSocialValida red = proyectarNombres (usuarios red)
-                      | otherwise = []
+nombresDeUsuarios (us, _, _) = proyectarNombres us 
 
---Funciones auxiliares para nombresDeUsuarios
-
-proyectarNombres :: [Usuario] -> [String]
-proyectarNombres (u:us) | (u:us) == [u] = (snd u : [])  
-                        | sinRepetidos (u:us) = (snd u : (proyectarNombres us))
-                        | otherwise = proyectarNombres (eliminarRepetidos (u:us))
-
-eliminarRepetidos :: (Eq t) => [t] -> [t]
-eliminarRepetidos (e:list) | sinRepetidos (e:list) = e:list
-                           | pertenece e list = eliminarRepetidos list
-                           | otherwise = e : (eliminarRepetidos list)
---Fin funciones auxiliares para nombresDeUSuarios
-
--- nombresDeUsuarios: Dada una red social valida, devuelve una lista de los nombres de los usuarios de la red.
-
+-- describir qué hace la función: .....
 amigosDe :: RedSocial -> Usuario -> [Usuario]
-amigosDe red u | usuarios red == [] = []
-               | (u /= u2) && (relacionadosDirecto u u2 red ) = u2 : (amigosDe sinU2 u) 
-               | otherwise = amigosDe sinU2 u
-               where u2 = head (usuarios red)
-                     sinU2 = (tail (usuarios red), relaciones red, publicaciones red ) 
+amigosDe (_, [], _) _ = []
+amigosDe (us, (u1, u2):rs, ps) u
+    | sonElMismoUsuario u u1 = u2 : siguienteAmigo
+    | sonElMismoUsuario u u2 = u1 : siguienteAmigo
+    | otherwise = siguienteAmigo
+          where siguienteAmigo =   amigosDe (us, rs, ps) u   
 
 -- describir qué hace la función: .....
 cantidadDeAmigos :: RedSocial -> Usuario -> Int
-cantidadDeAmigos red u = longitud (amigosDe red u)
-
---Funcion auxiliar para cantidadDeAmigos
-longitud :: (Eq t) => [t]->Int
-longitud [] = 0
-longitud (x:xs) = 1 + longitud xs
---Fin funcion auxiliar para cantidadDeAmigos
+cantidadDeAmigos red u = longitud (amigosDe red us)
 
 -- describir qué hace la función: .....
 usuarioConMasAmigos :: RedSocial -> Usuario
-usuarioConMasAmigos red = compararAmigos red (usuarios red)
---Funcion auxiliar para usuarioConMasAmigos
-compararAmigos :: RedSocial -> [Usuario] -> Usuario
-compararAmigos red [] = undefined
-compararAmigos red (u:us) | (u:us) == [u] = u
-                          | cantidadDeAmigos red u <= cantidadDeAmigos red (head us) = compararAmigos red us
-                          | otherwise = compararAmigos red (u: (tail us)) 
+usuarioConMasAmigos (us, rs, ps) = usuarioConMasAmigos' (tail us) (head us)
+  where
+    usuarioConMasAmigos' [] res = res
+    usuarioConMasAmigos' (u:us) res
+      | cantidadDeAmigos (us, rs, ps) u > cantidadDeAmigos (us, rs, ps) res = usuarioConMasAmigos' us u
+      | otherwise = usuarioConMasAmigos' us res
 
 -- describir qué hace la función: .....
 estaRobertoCarlos :: RedSocial -> Bool
 estaRobertoCarlos red = (cantidadDeAmigos red (usuarioConMasAmigos red) > 10)
+
 -- describir qué hace la función: .....
 publicacionesDe :: RedSocial -> Usuario -> [Publicacion]
-publicacionesDe red u = publicacionesDeAux (publicaciones red) u
-
---Auxiliar de publicacionesDe
-publicacionesDeAux :: [Publicacion] -> Usuario -> [Publicacion]
-publicacionesDeAux [] u = []
-publicacionesDeAux (p:pubs) u | (usuarioDePublicacion p == u) = p: (publicacionesDeAux pubs u)
-                  | otherwise = publicacionesDeAux pubs u
---Fin Auxiliar
+publicacionesDe (_, _, []) _ = []
+publicacionesDe (us, rs, p:ps) u | u == (usuarioDePublicacion p) = p : siguientesPublicaciones
+                                 | otherwise = siguientesPublicaciones
+                                 where siguientesPublicaciones = publicacionesDe (us, rs, ps) us
 
 -- describir qué hace la función: .....
 publicacionesQueLeGustanA :: RedSocial -> Usuario -> [Publicacion]
-publicacionesQueLeGustanA red u = pubsQueLeGustanAAUX (publicaciones red) u
-
-pubsQueLeGustanAAUX :: [Publicacion] -> Usuario -> [Publicacion]
-pubsQueLeGustanAAUX [] u = []
-pubsQueLeGustanAAUX (p:pubs) u | pertenece u (likesDePublicacion p) = p : (pubsQueLeGustanAAUX pubs u)
-                               | otherwise = pubsQueLeGustanAAUX pubs u 
-
+publicacionesQueLeGustanA (_, _, []) _ = []
+publicacionesQueLeGustanA (us, rs, (autor, texto, likes):ps) u | pertenece u likes = (autor, texto, likes) : siguientesPubs 
+                                                               | otherwise = siguientesPubs
+                                                               where siguientesPubs =publicacionesQueLeGustanA (us, rs, ps) u
 -- describir qué hace la función: .....
 lesGustanLasMismasPublicaciones :: RedSocial -> Usuario -> Usuario -> Bool
 lesGustanLasMismasPublicaciones red u1 u2 = mismosElementos (publicacionesQueLeGustanA red u1) (publicacionesQueLeGustanA red u2)
 
 -- describir qué hace la función: .....
 tieneUnSeguidorFiel :: RedSocial -> Usuario -> Bool
-tieneUnSeguidorFiel red u = existeSeguidorFiel red (usuarios red) u
-
-existeSeguidorFiel :: RedSocial -> [Usuario] -> Usuario -> Bool
-existeSeguidorFiel red us autor | us == [] = False
-                                | leGustanTodasLasPublisDe (publicacionesDe red autor) (head us) = True
-                                | otherwise = existeSeguidorFiel red (tail us) autor  
-
-leGustanTodasLasPublisDe :: [Publicacion] -> Usuario -> Bool
-leGustanTodasLasPublisDe pubs u | pubs == [] = True
-                                | likesDePublicacion (head pubs) == [] = False
-                                | pertenece u (likesDePublicacion (head pubs)) = True && (leGustanTodasLasPublisDe (tail pubs) u) 
-                                | otherwise = False  
+tieneUnSeguidorFiel ([], _, _) _ = False
+tieneUnSeguidorFiel red u | contiene (publicacionesDe red u) (publicacionesQueLeGustanA red usuarioActual) = True
+                          | otherwise = tieneUnSeguidorFiel siguienteRed user
+                           where
+                            usuarioActual = head (usuarios red)
+                            siguienteRed = (tail (usuarios red), relaciones red, publicaciones red)
 
 -- describir qué hace la función: .....
 existeSecuenciaDeAmigos :: RedSocial -> Usuario -> Usuario -> Bool
-existeSecuenciaDeAmigos red u1 u2 = sonDeLaRed red us && cadenaDeAmigos us red
-    where us = hastaUsuario red (desdeUsuario red (usuarios red) u1) u2
+existeSecuenciaDeAmigos red uInicio uObjetivo = existeSecuenciaDeAmigosAux red [uInicio] uObjetivo []
 
-hastaUsuario :: RedSocial -> [Usuario] -> Usuario -> [Usuario]
-hastaUsuario red us u2 | (terminaCon u2 us) = us
-                       | otherwise = hastaUsuario red (eliminarUltimo us) u2
+--Auxiliares
 
-eliminarUltimo :: (Eq t) => [t] -> [t]
-eliminarUltimo [] = []
-eliminarUltimo [_] = []
-eliminarUltimo (x:xs) = x : eliminarUltimo xs
+--1
+proyectarNombres :: [Usuario] -> [String]
+proyectarNombres [] = []
+proyectarNombres ((_, nombre):us) = sacarRepetidos(nombre : proyectarNombres us)
 
+sacarRepetidos :: Eq a => [a] -> [a]
+sacarRepetidos [] = []
+sacarRepetidos (x:xs)
+    | pertenece x xs = sacarRepetidos xs
+    | otherwise = x : sacarRepetidos xs
 
-desdeUsuario :: RedSocial -> [Usuario] -> Usuario -> [Usuario]
-desdeUsuario red us u1 | us == [] = []
-                       | (empiezaCon u1 us) = us
-                       | otherwise = desdeUsuario red (tail us) u1
+--2
+sonElMismoUsuario :: Usuario -> Usuario -> Bool
+sonElMismoUsuario user1 user2 = idDeUsuario user1 == idDeUsuario user2
 
+--3
+longitud :: [t] -> Int
+longitud [] = 0
+longitud (_:xs) = 1 + longitud xs 
 
---Predicados Auxiliares
+--7
 pertenece :: (Eq t) => t -> [t] -> Bool
 pertenece e [] = False
-pertenece e (x:xs) = e == x || pertenece e xs 
+pertenece e (x:xs) = e == x || pertenece e xs
 
+--8
 mismosElementos :: (Eq t) => [t] -> [t] -> Bool
 mismosElementos [] [] = True
 mismosElementos [] l2 = False
-mismosElementos l1 l2 = (pertenece (head l1) l2) && (mismosElementos (tail l1) (tail l2) )
+mismosElementos l1 [] = False
+mismosElementos (x:xs) l2 = pertenece x l2 && mismosElementos xs (sacarUnaVez x l2)
 
-empiezaCon :: (Eq t) => t -> [t] -> Bool
-empiezaCon e [] = False
-empiezaCon e l = head l == e
+sacarUnaVez :: (Eq t) => t -> [t] -> [t]
+sacarUnaVez e [] = []
+sacarUnaVez e (x:xs) | e == x = xs
+                     | otherwise = x : sacarUnaVez e xs
 
-terminaCon :: (Eq t) => t -> [t] -> Bool
-terminaCon e [] = False
-terminaCon e [x] = e == x
-terminaCon e (x:xs) = terminaCon e xs
+--9
+contiene :: (Eq t) => [t] -> [t] -> Bool
+contiene [] [] = True
+contiene [] l2 = True
+contiene l1 [] = False
+contiene (x:xs) l2 = pertenece x l2 && contiene xs l2
 
-sinRepetidos :: (Eq t) => [t] -> Bool
-sinRepetidos [] = True
-sinRepetidos (x:xs) = not(pertenece x xs) && sinRepetidos xs
-
-sonDeLaRed :: RedSocial -> [Usuario] -> Bool
-sonDeLaRed red [] = True
-sonDeLaRed red us = (pertenece (head us) (usuarios red) ) && sonDeLaRed red (tail us)
-
-relacionadosDirecto :: Usuario -> Usuario -> RedSocial -> Bool
-relacionadosDirecto u1 u2 red = pertenece (u1, u2) (relaciones red) || pertenece (u2, u1) (relaciones red)
-
-cadenaDeAmigos :: [Usuario] -> RedSocial -> Bool
-cadenaDeAmigos [user1,user0] red = (relacionadosDirecto user1 user0 red)
-cadenaDeAmigos us red = relacionadosDirecto (head us) (head (tail us)) red && cadenaDeAmigos (tail us) red
-
--- REVISAR
-noHayPublicacionesRepetidas :: [Publicacion] -> Bool
-noHayPublicacionesRepetidas pubs = sinRepetidos pubs
-{-Hay que revisar si noHayPublicacionesRepetidas realmente cumple la especificación-}
-
-usuariosLikeValidos :: [Usuario] -> [Usuario] -> Bool
-usuariosLikeValidos [] us = True
-usuariosLikeValidos (user:usl) us = (pertenece user us) && (usuariosLikeValidos usl us)  
-
-usuariosDelLikeDePublicacionSonUsuariosDeRed :: [Usuario] -> [Publicacion] -> Bool
-usuariosDelLikeDePublicacionSonUsuariosDeRed us [] = True
-usuariosDelLikeDePublicacionSonUsuariosDeRed us pubs = (pertenece (usuarioDePublicacion (head pubs)) us ) && (usuariosDelLikeDePublicacionSonUsuariosDeRed us (tail pubs))
-
-publicacionesValidas :: [Usuario] -> [Publicacion] -> Bool
-publicacionesValidas us pubs = (noHayPublicacionesRepetidas pubs) && (usuariosDelLikeDePublicacionSonUsuariosDeRed us pubs)
-
---Revisar
-noHayRelacionesRepetidas :: [Relacion] -> Bool
-noHayRelacionesRepetidas rels = sinRepetidos rels
-{-Hay que revisar si noHayRelacionesRepetidas realmente cumple la especificación-}
-
-relacionesAsimetricas :: [Relacion] -> Bool
-relacionesAsimetricas [] = True
-relacionesAsimetricas (rel:rels) =  not (pertenece (snd rel, fst rel) (rel:rels)) && relacionesAsimetricas rels   
-
-usuariosDeRelacionValidos :: [Usuario] -> [Relacion] -> Bool
-usuariosDeRelacionValidos us [] = True
-usuariosDeRelacionValidos us (rel:rels) = (pertenece (fst rel) us) && (pertenece (snd rel) us) && (usuariosDeRelacionValidos us rels)
-
-relacionesValidas :: [Usuario] -> [Relacion] -> Bool 
-relacionesValidas us rels = (usuariosDeRelacionValidos us rels) && (relacionesAsimetricas rels) && (noHayRelacionesRepetidas rels)
-
---Revisar 
-noHayIdsRepetidos :: [Usuario] -> Bool
-noHayIdsRepetidos us = sinRepetidos us  
-{-Revisar si noHayIdsRepetidos cumple la especificación-}
-
---Alternativa noHayIdsRepetidos (rebuscada pero cumple la especificación) 
-a_noHayIdsRepetidos :: [Usuario] -> Bool
-a_noHayIdsRepetidos [] = True
-a_noHayIdsRepetidos (u:us) = not (pertenece u us) && a_noHayIdsRepetidos us
-    where id = idDeUsuario u  
-
---Consultar si hay que tener en cuenta los nombres vacios ej "  " como longitud de longitud >0 (en caso de que no, este código cumple)
-usuarioValido :: Usuario -> Bool
-usuarioValido u = (idDeUsuario u > 0)&& ((nombreDeUsuario u) /= "")
-
-usuariosValidos :: [Usuario] -> Bool
-usuariosValidos [] = True
-usuariosValidos (u:us) = (usuarioValido u) && (noHayIdsRepetidos (u:us)) && (usuariosValidos us)
-
-redSocialValida :: RedSocial -> Bool
-redSocialValida red = (usuariosValidos (usuarios red)) && (relacionesValidas (usuarios red) (relaciones red)) && (publicacionesValidas (usuarios red) (publicaciones red))
-
+--10
+existeSecuenciaDeAmigosAux :: RedSocial -> [Usuario] -> Usuario -> [Usuario] -> Bool
+existeSecuenciaDeAmigosAux _ [] _ _ = False
+existeSecuenciaDeAmigosAux red (u:us) uObjetivo usVisitados | pertenece uObjetivo amigosActuales = True
+                                                            | otherwise = existeSecuenciaDeAmigosAux red siguientesAmigos uObjetivo (u:usVisitados)
+                                                             where
+                                                             amigosActuales = u : amigosDe red u
+                                                             siguientesAmigos = sacarTodos (us ++ amigosActuales) usVisitados
+sacarTodos :: (Eq t) => [t] -> [t] -> [t]
+sacarTodos [] l2 = []
+sacarTodos l1 [] = l1
+sacarTodos (x:xs) l2 | pertenece x l2 = sacarTodos xs l2
+                     | otherwise = x : sacarTodos xs l2
