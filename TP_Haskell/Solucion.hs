@@ -39,6 +39,7 @@ likesDePublicacion (_, _, us) = us
 -- EJERCICIOS --
 
 --toma la lista de usuarios de la red social y la pasa como argumento a la función proyectarNombres para obtener la lista de nombres de usuarios. 
+--la funcion Aux 'proyectarNombres' se encarga de filtrar los usuarios inválidos y de eliminar duplicados
 nombresDeUsuarios :: RedSocial -> [String]
 nombresDeUsuarios (us, _, _) = proyectarNombres us 
 
