@@ -25,10 +25,10 @@ publicaciones :: RedSocial -> [Publicacion]
 publicaciones (_, _, ps) = ps
 
 idDeUsuario :: Usuario -> Integer
-idDeUsuario (id, _) = id 
+idDeUsuario (id, _) = id
 
 nombreDeUsuario :: Usuario -> String
-nombreDeUsuario (_, nombre) = nombre 
+nombreDeUsuario (_, nombre) = nombre
 
 usuarioDePublicacion :: Publicacion -> Usuario
 usuarioDePublicacion (u, _, _) = u
@@ -41,7 +41,7 @@ likesDePublicacion (_, _, us) = us
 --toma la lista de usuarios de la red social y la pasa como argumento a la función proyectarNombres para obtener la lista de nombres de usuarios. 
 --la funcion Aux 'proyectarNombres' se encarga de filtrar los usuarios inválidos y de eliminar duplicados
 nombresDeUsuarios :: RedSocial -> [String]
-nombresDeUsuarios (us, _, _) = proyectarNombres us 
+nombresDeUsuarios (us, _, _) = proyectarNombres us
 
 
 --busca recursivamente las relaciones de la red social 
@@ -49,10 +49,10 @@ nombresDeUsuarios (us, _, _) = proyectarNombres us
 amigosDe :: RedSocial -> Usuario -> [Usuario]
 amigosDe (_, [], _) _ = []
 amigosDe (us, (u1, u2):rs, ps) u
-    | sonElMismoUsuario u u1 = u2 : siguienteAmigo
-    | sonElMismoUsuario u u2 = u1 : siguienteAmigo
+    |  u == u1 = u2 : siguienteAmigo
+    |  u == u2 = u1 : siguienteAmigo
     | otherwise = siguienteAmigo
-          where siguienteAmigo =   amigosDe (us, rs, ps) u   
+          where siguienteAmigo =   amigosDe (us, rs, ps) u
 
 
 --utiliza la función 'amigosDe' para obtener la lista de amigos del usuario en la red social 
@@ -74,13 +74,13 @@ usuarioConMasAmigos (us, rs, ps) = usuarioConMasAmigos' (tail us) (head us)
 
 --determina si el usuario con más amigos en la red social tiene más de 10 amigos, devolviendo True de ser el caso, caso contrario,False
 estaRobertoCarlos :: RedSocial -> Bool
-estaRobertoCarlos red = (cantidadDeAmigos red (usuarioConMasAmigos red) > 10)
+estaRobertoCarlos red = cantidadDeAmigos red (usuarioConMasAmigos red) > 10
 
 
 --filtra las publicaciones de una red social y devuelve únicamente aquellas publicaciones que fueron realizadas por un usuario específico
 publicacionesDe :: RedSocial -> Usuario -> [Publicacion]
 publicacionesDe (_, _, []) _ = []
-publicacionesDe (us, rs, p:ps) u | u == (usuarioDePublicacion p) = p : siguientesPublicaciones
+publicacionesDe (us, rs, p:ps) u | u == usuarioDePublicacion p = p : siguientesPublicaciones
                                  | otherwise = siguientesPublicaciones
                                  where siguientesPublicaciones = publicacionesDe (us, rs, ps) u
 
@@ -88,7 +88,7 @@ publicacionesDe (us, rs, p:ps) u | u == (usuarioDePublicacion p) = p : siguiente
 --filtra las publicaciones de una red social y devuelve únicamente aquellas publicaciones en las que el usuario especificado se encuentra en la lista de likes(publicaciones que le gustan)
 publicacionesQueLeGustanA :: RedSocial -> Usuario -> [Publicacion]
 publicacionesQueLeGustanA (_, _, []) _ = []
-publicacionesQueLeGustanA (us, rs, (autor, texto, likes):ps) u | pertenece u likes = (autor, texto, likes) : siguientesPubs 
+publicacionesQueLeGustanA (us, rs, (autor, texto, likes):ps) u | pertenece u likes = (autor, texto, likes) : siguientesPubs
                                                                | otherwise = siguientesPubs
                                                                where siguientesPubs =publicacionesQueLeGustanA (us, rs, ps) u
 
@@ -104,7 +104,9 @@ lesGustanLasMismasPublicaciones red u1 u2 = mismosElementos (publicacionesQueLeG
 -- Esto hasta encontrarlo o hasta que finalice la lista
 tieneUnSeguidorFiel :: RedSocial -> Usuario -> Bool
 tieneUnSeguidorFiel ([], _, _) _ = False
-tieneUnSeguidorFiel red u | contiene (publicacionesDe red u) (publicacionesQueLeGustanA red usuarioActual) = True
+tieneUnSeguidorFiel red u | longitud (publicacionesDe red u) == 0 = False
+                          | usuarioActual == u = tieneUnSeguidorFiel siguienteRed u
+                          | contiene (publicacionesDe red u) (publicacionesQueLeGustanA red usuarioActual) = True
                           | otherwise = tieneUnSeguidorFiel siguienteRed u
                            where
                             usuarioActual = head (usuarios red)
@@ -119,43 +121,45 @@ existeSecuenciaDeAmigos red uInicio uObjetivo = existeSecuenciaDeAmigosAux red [
 -- AUXILIARES --
 
 --1
+-- Retorna los nombres de los usuarios de una red social sin repetidos
 proyectarNombres :: [Usuario] -> [String]
 proyectarNombres [] = []
-proyectarNombres ((_, nombre):us) = sacarRepetidos(nombre : proyectarNombres us)
+proyectarNombres ((_, nombre):us) = sacarRepetidos (nombre : proyectarNombres us)
 
+-- Remueve los elementos repetidos de una lista
 sacarRepetidos :: Eq a => [a] -> [a]
 sacarRepetidos [] = []
 sacarRepetidos (x:xs)
     | pertenece x xs = sacarRepetidos xs
     | otherwise = x : sacarRepetidos xs
 
---2
-sonElMismoUsuario :: Usuario -> Usuario -> Bool
-sonElMismoUsuario user1 user2 = idDeUsuario user1 == idDeUsuario user2
-
 --3
+-- Retorna la longitud de una lista
 longitud :: [t] -> Int
 longitud [] = 0
-longitud (_:xs) = 1 + longitud xs 
+longitud (_:xs) = 1 + longitud xs
 
 --7
+-- Verifica que un elemento pertenezca a una lista
 pertenece :: (Eq t) => t -> [t] -> Bool
-pertenece e [] = False
-pertenece e (x:xs) = e == x || pertenece e xs
+pertenece e xs = foldr (\ x -> (||) (e == x)) False xs
 
 --8
+-- Verifica que 2 listas tengan los mismos elementos
 mismosElementos :: (Eq t) => [t] -> [t] -> Bool
 mismosElementos [] [] = True
 mismosElementos [] l2 = False
 mismosElementos l1 [] = False
 mismosElementos (x:xs) l2 = pertenece x l2 && mismosElementos xs (sacarUnaVez x l2)
 
+-- Remueve la primer aparición de un elemento en una lista
 sacarUnaVez :: (Eq t) => t -> [t] -> [t]
 sacarUnaVez e [] = []
 sacarUnaVez e (x:xs) | e == x = xs
                      | otherwise = x : sacarUnaVez e xs
 
---9
+--9 
+-- Verifica que una lista contenga al menos todos los elementos de otra
 contiene :: (Eq t) => [t] -> [t] -> Bool
 contiene [] [] = True
 contiene [] l2 = True
@@ -163,13 +167,18 @@ contiene l1 [] = False
 contiene (x:xs) l2 = pertenece x l2 && contiene xs l2
 
 --10
+
+-- Recibe una red social, una lista de amigos a visitar, un usuario objetivo y una lista de usuarios ya visitados
+-- Retorna si existe una secuencia de amigos que conecta al usuario de inicio con el usuario objetivo
 existeSecuenciaDeAmigosAux :: RedSocial -> [Usuario] -> Usuario -> [Usuario] -> Bool
 existeSecuenciaDeAmigosAux _ [] _ _ = False
-existeSecuenciaDeAmigosAux red (u:us) uObjetivo usVisitados | pertenece uObjetivo amigosActuales = True
-                                                            | otherwise = existeSecuenciaDeAmigosAux red siguientesAmigos uObjetivo (u:usVisitados)
+existeSecuenciaDeAmigosAux red (u:us) uObjetivo usVisitados | pertenece uObjetivo amigosActuales = True -- Si el usuario objetivo es amigo del usuario actual, se encontró una secuencia
+                                                            | otherwise = existeSecuenciaDeAmigosAux red siguientesAmigos uObjetivo (u:usVisitados) -- Si no, se continúa la búsqueda con los siguientes amigos
                                                              where
-                                                             amigosActuales = u : amigosDe red u
-                                                             siguientesAmigos = sacarTodos (us ++ amigosActuales) usVisitados
+                                                             amigosActuales = u : amigosDe red u -- Se obtienen los amigos del usuario actual
+                                                             siguientesAmigos = sacarTodos (us ++ amigosActuales) usVisitados -- Se eliminan los usuarios ya visitados de la lista de amigos a visitar
+
+-- Remueve todos los elementos de una lista que se encuentran en otra
 sacarTodos :: (Eq t) => [t] -> [t] -> [t]
 sacarTodos [] l2 = []
 sacarTodos l1 [] = l1
