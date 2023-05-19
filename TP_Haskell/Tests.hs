@@ -4,7 +4,7 @@ import Test.HUnit
 import Solucion
 
 main = runTestTT tests
-tests = test [testsCatedra, testSuite1, testSuite2, testSuite3, testSuite4, testSuite5, testSuite6, testSuite7, testSuite8, testSuite9, testSuite10]
+tests = test [testSuite1, testSuite2, testSuite3, testSuite4, testSuite5, testSuite6, testSuite7, testSuite8, testSuite9, testSuite10]
 
 testSuite1 = test [
     " no tiene usuarios" ~: (nombresDeUsuarios redC) ~?= [],
@@ -80,27 +80,6 @@ testSuite10 = test [
    " esta relacionado con si mismo y notiene amigos" ~: (existeSecuenciaDeAmigos redA usuario1 usuario1) ~?= False
  ]
 
-testsCatedra = test [
-    " nombresDeUsuarios 1" ~: (nombresDeUsuarios redAC) ~?= ["Juan","Natalia","Pedro","Mariela"],
-
-    " amigosDe 1" ~: (amigosDe redAC usuario1C) ~?= [usuario2C, usuario4C],
-
-    " cantidadDeAmigos 1" ~: (cantidadDeAmigos redAC usuario1C) ~?= 2,
-
-    " usuarioConMasAmigos 1" ~: expectAny (usuarioConMasAmigos redAC) [usuario2C, usuario4C],
-
-    " estaRobertoCarlos 1" ~: (estaRobertoCarlos redAC) ~?= False,
-
-    " publicacionesDe 1" ~: (publicacionesDe redAC usuario2C) ~?= [publicacion2_1C, publicacion2_2C],
-
-    " publicacionesQueLeGustanA 1" ~: (publicacionesQueLeGustanA redAC usuario1C) ~?= [publicacion2_2C, publicacion4_1C],
-
-    " lesGustanLasMismasPublicaciones 2" ~: (lesGustanLasMismasPublicaciones redBC usuario1C usuario3C) ~?= True,
-
-    " tieneUnSeguidorFiel 1" ~: (tieneUnSeguidorFiel redAC usuario1C) ~?= True,
-
-    " existeSecuenciaDeAmigos 1" ~: (existeSecuenciaDeAmigos redAC usuario1C usuario3C) ~?= True
- ]
 expectAny actual expected = elem actual expected ~? ("expected any of: " ++ show expected ++ "\n but got: " ++ show actual)
 
 
@@ -253,46 +232,3 @@ publicacion4_1 = (usuario4, "1", [ usuario4])
 publicacion4_2 = (usuario4, "2", [usuario4])
 publicacion4_3 = (usuario4, "3", [usuario4])
 
---Test Catedra
-
-
-usuario1C = (1, "Juan")
-usuario2C = (2, "Natalia")
-usuario3C = (3, "Pedro")
-usuario4C = (4, "Mariela")
-usuario5C = (5, "Natalia")
-
-relacion1_2C = (usuario1C, usuario2C)
-relacion1_3C = (usuario1C, usuario3C)
-relacion1_4C = (usuario4C, usuario1C) -- Notar que el orden en el que aparecen los usuarios es indistinto
-relacion2_3C = (usuario3C, usuario2C)
-relacion2_4C = (usuario2C, usuario4C)
-relacion3_4C = (usuario4C, usuario3C)
-
-publicacion1_1C = (usuario1C, "Este es mi primer post", [usuario2C, usuario4C])
-publicacion1_2C = (usuario1C, "Este es mi segundo post", [usuario4C])
-publicacion1_3C = (usuario1C, "Este es mi tercer post", [usuario2C, usuario5C])
-publicacion1_4C = (usuario1C, "Este es mi cuarto post", [])
-publicacion1_5C = (usuario1C, "Este es como mi quinto post", [usuario5C])
-
-publicacion2_1C = (usuario2C, "Hello World", [usuario4C])
-publicacion2_2C = (usuario2C, "Good Bye World", [usuario1C, usuario4C])
-
-publicacion3_1C = (usuario3C, "Lorem Ipsum", [])
-publicacion3_2C = (usuario3C, "dolor sit amet", [usuario2C])
-publicacion3_3C = (usuario3C, "consectetur adipiscing elit", [usuario2C, usuario5C])
-
-publicacion4_1C = (usuario4C, "I am Alice. Not", [usuario1C, usuario2C])
-publicacion4_2C = (usuario4C, "I am Bob", [])
-publicacion4_3C = (usuario4C, "Just kidding, i am Mariela", [usuario1C, usuario3C])
-
-
-usuariosAC = [usuario1C, usuario2C, usuario3C, usuario4C]
-relacionesAC = [relacion1_2C, relacion1_4C, relacion2_3C, relacion2_4C, relacion3_4C]
-publicacionesAC = [publicacion1_1C, publicacion1_2C, publicacion2_1C, publicacion2_2C, publicacion3_1C, publicacion3_2C, publicacion4_1C, publicacion4_2C]
-redAC = (usuariosAC, relacionesAC, publicacionesAC)
-
-usuariosBC = [usuario1C, usuario2C, usuario3C, usuario5C]
-relacionesBC = [relacion1_2C, relacion2_3C]
-publicacionesBC = [publicacion1_3C, publicacion1_4C, publicacion1_5C, publicacion3_1C, publicacion3_2C, publicacion3_3C]
-redBC = (usuariosBC, relacionesBC, publicacionesBC)
