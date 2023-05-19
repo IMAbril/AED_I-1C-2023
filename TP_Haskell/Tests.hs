@@ -75,7 +75,9 @@ testSuite10 = test [
    " amigo de amigo" ~: (existeSecuenciaDeAmigos redG usuario2 usuario4) ~?= True,
    " un usuario no tiene amigos" ~: (existeSecuenciaDeAmigos redG usuario1 usuario4) ~?= False,
    " tienen más de un amigo en común" ~: (existeSecuenciaDeAmigos redG usuario6 usuario9) ~?= True,
-   " cadena de amigos extensa" ~: (existeSecuenciaDeAmigos redJ usuario1 usuario5) ~?= True
+   " cadena de amigos extensa" ~: (existeSecuenciaDeAmigos redJ usuario1 usuario5) ~?= True,
+   " esta relacionado con si mismo y tiene amigos" ~: (existeSecuenciaDeAmigos redH usuario1 usuario1) ~?= True,
+   " esta relacionado con si mismo y notiene amigos" ~: (existeSecuenciaDeAmigos redA usuario1 usuario1) ~?= False
  ]
 
 testsCatedra = test [

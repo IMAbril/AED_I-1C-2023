@@ -175,7 +175,7 @@ existeSecuenciaDeAmigosAux _ [] _ _ = False
 existeSecuenciaDeAmigosAux red (u:us) uObjetivo usVisitados | pertenece uObjetivo amigosActuales = True -- Si el usuario objetivo es amigo del usuario actual, se encontró una secuencia
                                                             | otherwise = existeSecuenciaDeAmigosAux red siguientesAmigos uObjetivo (u:usVisitados) -- Si no, se continúa la búsqueda con los siguientes amigos
                                                              where
-                                                             amigosActuales = u : amigosDe red u -- Se obtienen los amigos del usuario actual
+                                                             amigosActuales = amigosDe red u -- Se obtienen los amigos del usuario actual
                                                              siguientesAmigos = sacarTodos (us ++ amigosActuales) usVisitados -- Se eliminan los usuarios ya visitados de la lista de amigos a visitar
 
 -- Remueve todos los elementos de una lista que se encuentran en otra
